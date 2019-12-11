@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Domain
 {
-    class Credentials
+   public class CredentialsViewModel
     {
         [JsonProperty]
         public string UserName { get; set; }

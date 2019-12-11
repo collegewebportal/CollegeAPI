@@ -4,9 +4,12 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Domain;
+using Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Service.Helpers;
 using Service.Implementation;
 using Service.Interface;
 
@@ -23,8 +26,6 @@ namespace API.Controllers
 
         private readonly JwtIssuerOptions _jwtOptions;
 
-
-
         public AuthController(UserManager<AppUser> userManager, IJwtFactory jwtFactory, IOptions<JwtIssuerOptions> jwtOptions)
 
         {
@@ -37,12 +38,8 @@ namespace API.Controllers
 
         }
 
-
-
         // POST api/auth/login
-
         [HttpPost("login")]
-
         public async Task<IActionResult> Post([FromBody]CredentialsViewModel credentials)
 
         {
@@ -74,8 +71,6 @@ namespace API.Controllers
             return new OkObjectResult(jwt);
 
         }
-
-
 
         private async Task<ClaimsIdentity> GetClaimsIdentity(string userName, string password)
 
