@@ -1,10 +1,10 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Domain
+
+using System;
+using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens;
+
+namespace Domain.Models
 {
     public class JwtIssuerOptions
     {
@@ -31,17 +31,19 @@ namespace Domain
         /// <summary>
         /// 4.1.5.  "nbf" (Not Before) Claim - The "nbf" (not before) claim identifies the time before which the JWT MUST NOT be accepted for processing.
         /// </summary>
-        public DateTime NotBefore { get; set; } = DateTime.UtcNow;
+        public DateTime NotBefore => DateTime.UtcNow;
 
         /// <summary>
         /// 4.1.6.  "iat" (Issued At) Claim - The "iat" (issued at) claim identifies the time at which the JWT was issued.
         /// </summary>
-        public DateTime IssuedAt { get; set; } = DateTime.UtcNow;
+        public DateTime IssuedAt => DateTime.UtcNow;
 
         /// <summary>
-        /// Set the timespan the token will be valid for (default is 5 min/300 seconds)
+        /// Set the timespan the token will be valid for (default is 120 min)
         /// </summary>
-        public TimeSpan ValidFor { get; set; } = TimeSpan.FromMinutes(5);
+        public TimeSpan ValidFor { get; set; } = TimeSpan.FromMinutes(120);
+
+
 
         /// <summary>
         /// "jti" (JWT ID) Claim (default ID is a GUID)

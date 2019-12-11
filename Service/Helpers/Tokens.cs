@@ -1,4 +1,5 @@
 ﻿using Domain;
+using Domain.Models;
 using Newtonsoft.Json;
 using Service.Interface;
 using System;

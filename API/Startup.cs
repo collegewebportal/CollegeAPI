@@ -1,5 +1,6 @@
 ﻿using Amazon.DynamoDBv2;
 using Domain;
+using Domain.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
