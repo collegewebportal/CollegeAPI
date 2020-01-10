@@ -3,10 +3,12 @@ using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using Domain;
+using Microsoft.AspNetCore.JsonPatch;
 using Service.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -40,21 +42,48 @@ namespace Service.Implementation
             //Save an Student object  
             await context.SaveAsync<Student>(student);
         }
-        public async Task UpdateStudentRecord(Student student)
+        public async Task UpdateStudentRecord(int id,JsonPatchDocument<Student> studentPatch)
         {
-            //Set a local DB context  
-            var context = new DynamoDBContext(_client);
-
-
-            //Getting an Student object  
-            List<ScanCondition> conditions = new List<ScanCondition>();
-            conditions.Add(new ScanCondition("id", ScanOperator.Equal, student.Id));
-            var allDocs = await context.ScanAsync<Student>(conditions).GetRemainingAsync();
-            var editedState = allDocs;
-            if (editedState != null)
+            try
             {
-                //Save an Student object  
-                await context.SaveAsync<Student>(editedState[0]);
+                //Set a local DB context  
+                var context = new DynamoDBContext(_client);
+
+                // Define item key
+                //  Hash-key of the target item is string value "Mark Twain"
+                //  Range-key of the target item is string value "The Adventures of Tom Sawyer"
+                Dictionary<string, AttributeValue> key = new Dictionary<string, AttributeValue>
+{
+    { "Id", new AttributeValue { S = id.ToString() } }
+};
+
+                // Define attribute updates
+                Dictionary<string, AttributeValueUpdate> updates = new Dictionary<string, AttributeValueUpdate>();
+
+                PropertyInfo[] properties = typeof(Student).GetProperties();
+                foreach (PropertyInfo property in properties)
+                {
+                    updates[property.Name] = new AttributeValueUpdate()
+                    {
+                        Action = AttributeAction.ADD,
+                        Value = new AttributeValue { S = property.GetValue(student).ToString() }
+                    };
+                }
+                // Create UpdateItem request
+                UpdateItemRequest request = new UpdateItemRequest
+                {
+                    TableName = "Student",
+                    Key = key,
+                    AttributeUpdates = updates
+                };
+
+                // Issue request
+                await _client.UpdateItemAsync(request);
+            }
+            catch (Exception ex)
+            {
+
+                throw;
             }
         }
         public async Task DeleteStudentRecord(string id)
@@ -76,20 +105,25 @@ namespace Service.Implementation
         }
         public async Task<Student> GetStudentSingleRecord(string id)
         {
-            var context = new DynamoDBContext(_client);
-            //Getting an Student object  
-            List<ScanCondition> conditions = new List<ScanCondition>();
-            conditions.Add(new ScanCondition("id", ScanOperator.Equal, id));
-            var allDocs = await context.ScanAsync<Student>(conditions).GetRemainingAsync();
-            var student = allDocs;
-            return student[0];
+            try
+            {
+                var context = new DynamoDBContext(_client);
+                //Getting an Student object  
+                List<ScanCondition> conditions = new List<ScanCondition>();
+                conditions.Add(new ScanCondition("Id", ScanOperator.Equal, id));
+                return await context.LoadAsync<Student>(Convert.ToInt32(id));
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
         public async Task<IEnumerable<Student>> GetStudentRecords()
         {
             var context = new DynamoDBContext(_client);
             //Getting an Student object  
             List<ScanCondition> conditions = new List<ScanCondition>();
-            conditions.Add(new ScanCondition("IsDeleted", ScanOperator.Equal, 0));
+            conditions.Add(new ScanCondition("Id", ScanOperator.IsNotNull));
             var allDocs = await context.ScanAsync<Student>(conditions).GetRemainingAsync();
             return allDocs;
         }
@@ -145,6 +179,31 @@ namespace Service.Implementation
             };
             createTableRequest.KeySchema = new[]
             {
+        new KeySchemaElement
+        {
+            AttributeName = "Id",
+            KeyType = KeyType.HASH,
+        },
+        new KeySchemaElement
+        {
+            AttributeName = "FirstName",
+            KeyType = KeyType.HASH,
+        },
+        new KeySchemaElement
+        {
+            AttributeName = "LastName",
+            KeyType = KeyType.HASH,
+        },
+        new KeySchemaElement
+        {
+            AttributeName = "Phone",
+            KeyType = KeyType.HASH,
+        },
+        new KeySchemaElement
+        {
+            AttributeName = "Gender",
+            KeyType = KeyType.HASH,
+        },
         new KeySchemaElement
         {
             AttributeName = "Id",

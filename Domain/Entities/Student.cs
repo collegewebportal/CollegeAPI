@@ -1,7 +1,4 @@
 ﻿using Amazon.DynamoDBv2.DataModel;
-using Domain.Entities;
-using Newtonsoft.Json;
-using System;
 using System.Runtime.Serialization;
 
 namespace Domain
@@ -38,7 +35,6 @@ namespace Domain
         [DataMember(Name = "qualification")]
         public Qualification AcademicDetails { get; set; }
 
-        public AppUser Identity { get; set; }
     }
 
     public class Qualification

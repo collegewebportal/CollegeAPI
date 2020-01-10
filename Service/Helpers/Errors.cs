@@ -24,4 +24,13 @@ namespace Service.Helpers
             return modelState;
         }
     }
+
+
+    public class CMSException : Exception
+    {
+        public CMSException(string message)
+           : base(message)
+        {
+        }
+    }
 }
