@@ -1,14 +1,11 @@
-﻿using Amazon.DynamoDBv2.DataModel;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
 namespace Domain
 {
 
-    [DynamoDBTable("Student")]
     public class Student
     {
         [DataMember(Name = "id")]
-        [DynamoDBHashKey]
         public int Id { get; set; }
 
         [DataMember(Name = "firstName")]
@@ -30,7 +27,7 @@ namespace Domain
         public string DateOfBirth { get; set; }
 
         [DataMember(Name = "address")]
-        public Address Address { get; set; }
+        public Address AddressInfo { get; set; }
 
         [DataMember(Name = "qualification")]
         public Qualification AcademicDetails { get; set; }
@@ -39,6 +36,10 @@ namespace Domain
 
     public class Qualification
     {
+
+        [DataMember(Name = "id")]
+        public int Id { get; set; }
+
         [DataMember(Name = "academic")]
         public string Academic { get; set; }
 
@@ -54,6 +55,9 @@ namespace Domain
 
     public class Address
     {
+        [DataMember(Name = "id")]
+        public int Id { get; set; }
+
         [DataMember(Name = "addressline1")]
         public string Addressline1 { get; set; }
 

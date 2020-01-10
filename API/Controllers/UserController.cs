@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Domain;
+using Domain.Entities;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -15,29 +16,29 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StudentsController : Controller
+    public class UserController : Controller
     {
-        private readonly IStudentService _dataAccessProvider;
+        private readonly IUserService _dataAccessProvider;
         private readonly ILogger _logger;
-        public StudentsController(ILogger<StudentsController> logger, IStudentService dataAccessProvider)
+        public UserController(ILogger<UserController> logger, IUserService dataAccessProvider)
         {
             _dataAccessProvider = dataAccessProvider;
             _logger = logger;
         }
         [HttpGet]
-        public async Task<IEnumerable<Student>> GetAll()
+        public async Task<IEnumerable<User>> GetAll()
         {
-            return await _dataAccessProvider.GetStudentRecords();
+            return await _dataAccessProvider.GetUserRecords();
         }
         [HttpPost]
         [Route("Create")]
-        public async Task Create(Student student)
+        public async Task Create(User user)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    await _dataAccessProvider.AddStudentRecord(student);
+                    await _dataAccessProvider.AddUserRecord(user);
                 }
             }
             catch (Exception ex)
@@ -48,24 +49,24 @@ namespace API.Controllers
         }
         [HttpGet]
         [Route("{id}")]
-        public async Task<Student> Get(string id)
+        public async Task<User> Get(string id)
         {
-            return await _dataAccessProvider.GetStudentSingleRecord(id);
+            return await _dataAccessProvider.GetUsersingleRecord(id);
         }
         [HttpPatch]
         [Route("{id}")]
-        public async Task Update(int id,[FromBody] JsonPatchDocument<Student> studentPatch)
+        public async Task Update(int id,[FromBody] JsonPatchDocument<User> userPatch)
         {
             if (ModelState.IsValid)
             {
-                await _dataAccessProvider.UpdateStudentRecord(id,studentPatch);
+                await _dataAccessProvider.UpdateUserRecord(id,userPatch);
             }
         }
         [HttpDelete]
-        [Route("{studentId}")]
-        public async Task Delete(string studentId)
+        [Route("{id}")]
+        public async Task Delete(string userId)
         {
-            await _dataAccessProvider.DeleteStudentRecord(studentId);
+            await _dataAccessProvider.DeleteUserRecord(userId);
         }
     }
 }

@@ -1,24 +1,13 @@
-﻿using Amazon.DynamoDBv2;
-using Domain;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Service.Extensions;
-using Service.Helpers;
-using Service.Implementation;
+using Persistance;
 using Service.Interface;
-using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using System.Text;
+using Service.Implementation;
 
 namespace API
 {
@@ -30,32 +19,22 @@ namespace API
         }
 
         public IConfiguration Configuration { get; }
-        private const string SecretKey = "iNivDmHLpUA223sqsfhqGbMRdRj1PVkH"; // todo: get this from somewhere secure
-        private readonly SymmetricSecurityKey _signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(SecretKey));
+
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            var connectionstring = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=CMSDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+            //services.AddDbContext<CMSDBContext>(options => options.UseSqlServer(Configuration.GetConnectionString("CMSDBContext")));
+            services.AddDbContext<CMSDBContext>(options => options.UseSqlServer(connectionstring));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
             });
 
-            // AWS Options
-            
-            services.AddDefaultAWSOptions(Configuration.GetAWSOptions());
-            services.AddAWSService<IAmazonDynamoDB>();
-            Environment.SetEnvironmentVariable("AWS_ACCESS_KEY_ID", Configuration["AWS:AccessKey"]);
-            Environment.SetEnvironmentVariable("AWS_SECRET_ACCESS_KEY", Configuration["AWS:SecretKey"]);
-            Environment.SetEnvironmentVariable("AWS_REGION", Configuration["AWS:Region"]);
-
-            services.AddAWSService<IAmazonDynamoDB>();
-
-            services.AddScoped<IStudentService, StudentService>();
-
-            // Register the ConfigurationBuilder instance of FacebookAuthSettings
-         
+            services.AddTransient<IUserService, UserService>();
+            services.AddTransient<IStudentService, StudentService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -69,42 +48,18 @@ namespace API
             {
                 app.UseHsts();
             }
-
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
-
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
             // specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "User");
             });
-
-            app.UseExceptionHandler(
-          builder =>
-          {
-              builder.Run(
-                        async context =>
-                        {
-                            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                            context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
-
-                            var error = context.Features.Get<IExceptionHandlerFeature>();
-                            if (error != null)
-                            {
-                                context.Response.AddApplicationError(error.Error.Message);
-                                await context.Response.WriteAsync(error.Error.Message).ConfigureAwait(false);
-                            }
-                        });
-          });
-
-            app.UseAuthentication();
-            app.UseDefaultFiles();
-            app.UseStaticFiles();
             app.UseHttpsRedirection();
             app.UseMvc();
-
-          
         }
     }
+
+   
 }
