@@ -13,7 +13,7 @@ namespace Domain.Entities
 
         [Required]
         [DataMember(Name = "Name")]
-        public string FirstName { get; set; }
+        public string Name { get; set; }
 
         [Required]
         [DataMember(Name = "phone")]
@@ -27,12 +27,5 @@ namespace Domain.Entities
         [DataMember(Name = "address")]
         public string Address { get; set; }
 
-        [Required]
-        [DataMember(Name = "isCompleted")]
-        public string IsCompleted { get; set; }
-
-        [Required]
-        [DataMember(Name = "comments")]
-        public string Comments { get; set; }
     }
 }

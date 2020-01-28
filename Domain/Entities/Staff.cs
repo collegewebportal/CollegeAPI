@@ -8,20 +8,21 @@ namespace Domain.Entities
 {
     public class Staff
     {
+        [Key]
+        [DataMember(Name = "id")]
         public int Id { get; set; }
 
-        [Required]
         [DataMember(Name = "Name")]
         public string FirstName { get; set; }
 
-        [Required]
         [DataMember(Name = "phone")]
         public long Phone { get; set; }
 
-        [Required]
+        
         [DataMember(Name = "email")]
         public string Email { get; set; }
 
+        [DataMember(Name = "password")]
         public string Password { get; set; }
 
         

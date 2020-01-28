@@ -5,7 +5,6 @@ using Persistance;
 using Service.Interface;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Service.Implementation
@@ -21,7 +20,7 @@ namespace Service.Implementation
         {
             try
             {
-                //Staff.Password=
+                Staff.Password = CreateRandomPassword(8);
                 _context.Staffs.Add(Staff);
                 return _context.SaveChangesAsync();
             }
@@ -58,12 +57,56 @@ namespace Service.Implementation
 
         public async Task<Staff> GetStaffsingleRecordAsync(int? id)
         {
-           return await _context.Staffs.FirstOrDefaultAsync(x => x.Id == id);
+            return await _context.Staffs.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public Task UpdateStaffRecord(int id, JsonPatchDocument<Staff> staffPatch)
+        public async Task<bool> UpdateStaffRecord(int id, JsonPatchDocument<Staff> staffPatch)
         {
-            throw new NotImplementedException();
+            Staff staffToUpdate = await _context.Staffs.FirstOrDefaultAsync(x => x.Id == id );
+            _context.Staffs.Update(staffPatch);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> Login(string id, string pwd)
+        {
+            bool userFound = false;
+            var staff = await _context.Staffs.FirstOrDefaultAsync(x => x.Email == id && x.Password == pwd);
+
+            if (staff != null)
+                userFound = true;
+
+            return userFound;
+        }
+
+        public static string CreateRandomPassword(int PasswordLength)
+        {
+            string _allowedChars = "0123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ";
+            Random randNum = new Random();
+            char[] chars = new char[PasswordLength];
+            int allowedCharCount = _allowedChars.Length;
+            for (int i = 0; i < PasswordLength; i++)
+            {
+                chars[i] = _allowedChars[(int)((_allowedChars.Length) * randNum.NextDouble())];
+            }
+            return new string(chars);
+        }
+
+        public async Task<bool> ChangePassword(string id, string oldpwd, string newpwd)
+        {
+            try
+            {
+                Staff staffToUpdate= await _context.Staffs.FirstOrDefaultAsync(x => x.Email == id && x.Password == oldpwd);
+                staffToUpdate.Password = newpwd;
+                _context.Staffs.Update(staffToUpdate);
+                await _context.SaveChangesAsync();
+                return true;
+                
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }

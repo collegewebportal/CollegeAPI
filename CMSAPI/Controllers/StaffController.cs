@@ -13,13 +13,12 @@ namespace CMSAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
     public class StaffController : ControllerBase
     {
         private readonly IStaffService _dataAccessProvider;
         private readonly ILogger<StaffController> _logger;
 
-        public StaffController(ILogger<StaffController> logger,IStaffService dataAccessProvider)
+        public StaffController(ILogger<StaffController> logger, IStaffService dataAccessProvider)
         {
             _logger = logger;
             _dataAccessProvider = dataAccessProvider;
@@ -49,15 +48,15 @@ namespace CMSAPI.Controllers
 
         [HttpPost]
         [Route("create")]
-        public async Task<ActionResult> Create(Staff Staff)
+        public async Task<ActionResult> Create(Staff staff)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    _logger.LogInformation("Registering Staff named {0}", Staff.FirstName);
-                    await _dataAccessProvider.AddStaffRecord(Staff);
-                    _logger.LogInformation("Staff named {0} registered succesfully", Staff.FirstName);
+                    _logger.LogInformation("Registering Staff named {0}", staff.FirstName);
+                    await _dataAccessProvider.AddStaffRecord(staff);
+                    _logger.LogInformation("Staff named {0} registered succesfully", staff.FirstName);
                     return Ok();
                 }
                 else
@@ -71,24 +70,48 @@ namespace CMSAPI.Controllers
         }
         [HttpGet]
         [Route("{id}")]
-        public async Task<Staff> Get(int? id)
+        public async Task<ActionResult<Staff>> Get(int? id)
         {
-            return await _dataAccessProvider.GetStaffsingleRecordAsync(id);
+            try
+            {
+                return await _dataAccessProvider.GetStaffsingleRecordAsync(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Something went wrong: {ex}");
+                return CreatedAtAction(nameof(Get), ex);
+            }
         }
         [HttpPatch]
         [Route("{id}")]
-        public async Task Update(int id, [FromBody] JsonPatchDocument<Staff> StaffPatch)
+        public async Task<ActionResult<bool>> Update(int id, [FromBody] JsonPatchDocument<Staff> StaffPatch)
         {
-            if (ModelState.IsValid)
+            try
             {
-                await _dataAccessProvider.UpdateStaffRecord(id, StaffPatch);
+                if (ModelState.IsValid)
+                    return await _dataAccessProvider.UpdateStaffRecord(id, StaffPatch);
+                else
+                    return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Something went wrong: {ex}");
+                return CreatedAtAction(nameof(Update), ex);
             }
         }
         [HttpDelete]
         [Route("{id}")]
-        public async Task Delete(int? StaffId)
+        public async Task<ActionResult<int>> Delete(int? StaffId)
         {
-            await _dataAccessProvider.DeleteStaffRecordAsync(StaffId);
+            try
+            {
+                return await _dataAccessProvider.DeleteStaffRecordAsync(StaffId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Something went wrong: {ex}");
+                return CreatedAtAction(nameof(Delete), ex);
+            }
         }
 
     }

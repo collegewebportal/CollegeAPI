@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Domain.Entities
 {
-    public class Leads
+    public class Lead
     {
         [DataMember(Name = "id")]
         public int Id { get; set; }

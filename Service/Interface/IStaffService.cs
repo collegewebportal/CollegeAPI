@@ -12,7 +12,9 @@ namespace Service.Interface
         Task<List<Staff>> GetStaffRecords();
         Task AddStaffRecord(Staff staff);
         Task<Staff> GetStaffsingleRecordAsync(int? id);
-        Task UpdateStaffRecord(int id, JsonPatchDocument<Staff> staffPatch);
+        Task<bool> UpdateStaffRecord(int id, JsonPatchDocument<Staff> staffPatch);
         Task<int> DeleteStaffRecordAsync(int? staffId);
+        Task<bool> Login(string id, string pwd);
+        Task<bool> ChangePassword(string id, string oldpwd, string newpwd);
     }
 }
